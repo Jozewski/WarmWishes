@@ -1,0 +1,23 @@
+{
+  "name": "warmwishes",
+  "version": "1.0.0",
+  "description": "Warm Wishes is a full-stack web application designed to empower non-profit organizations by streamlining project management, donation tracking, and overall operational efficiency.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jozewski/WarmWishes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jozewski/WarmWishes/issues"
+  },
+  "homepage": "https://github.com/Jozewski/WarmWishes#readme"
+}
