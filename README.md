@@ -56,7 +56,7 @@ Warm Wishes leverages a robust tech stack to deliver a powerful and scalable pro
 
 1. **Clone the repository:**
  ```
-git clone http://104.131.171.220/jliszewski/project-tracker.git
+git@github.com:Jozewski/WarmWishes.git
  ```  
 
 2. **Navigate to the project directory:**
