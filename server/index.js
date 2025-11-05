@@ -7,6 +7,7 @@ import projectIndex from "./routes/projects/projectIndex.js"
 import builderIndex from "./routes/builders/builderIndex.js"
 import contactIndex from "./contacts/contactIndex.js"
 import dataSetIndex from "./routes/data/dataSetIndex.js"
+import messageIndex from "./routes/messages/messageIndex.js"
 
 const app = express()
 app.use(express.json())
@@ -20,6 +21,7 @@ app.use("/projects", projectIndex)
 app.use("/builders", builderIndex)
 app.use("/contacts", contactIndex)
 app.use("/dataset", dataSetIndex)
+app.use("/messages", messageIndex)
 
 
 app.all('*', (req, res) =>{
