@@ -41,6 +41,34 @@ const projectSchema = new Schema({
     username: String,
     roles: [String],
   },
+  donations: [
+    {
+      donatedItem: {
+        type: String,
+        default: "",
+      },
+      numberOfItems: {
+        type: Number,
+        default: 0,
+      },
+      category: {
+        type: String,
+        default: "",
+      },
+      dateReceived: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+  donationSummary: {
+    totalItems: {
+      type: Number,
+      default: 0,
+    },
+    lastUpdated: Date,
+    description: String,
+  },
 });
 
 export default projectSchema;

@@ -5,6 +5,7 @@ import builderReducer from './redux/builderSlice'
 import userReducer from './redux/userSlice'
 import contactReducer from './redux/contactsSlice'
 import dataSetReducer from './redux/DataSetSlice'
+import messagesReducer from './redux/messagesSlice'
 import { listenerMiddleware } from './redux/sessionStorageMiddleware'
 
 const preloadedState = () => {
@@ -34,7 +35,8 @@ export const store = configureStore({
     builder: builderReducer,
     user: userReducer,
     contacts: contactReducer,
-    datasets: dataSetReducer
+    datasets: dataSetReducer,
+    messages: messagesReducer
   },
   preloadedState: preloadedState(),
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(listenerMiddleware.middleware)

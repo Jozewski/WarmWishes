@@ -39,6 +39,12 @@ const projectService = {
     return await axios.delete(
       `${import.meta.env.VITE_NODE_SERVER_URL}/projects/${projectId}/tasks/${taskId}`,
     )
+  },
+  projectDonationUpdate: async (projectId, donationData) => {
+    return await axios.put(
+      `${import.meta.env.VITE_NODE_SERVER_URL}/projects/${projectId}/donations`,
+      donationData
+    )
   }
 
 }

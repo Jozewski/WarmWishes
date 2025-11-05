@@ -7,6 +7,7 @@ import projectGetOne from "./projectGetOne.js"
 import projectTaskCreate from "./projectTaskCreate.js"
 import projectTaskUpdate from "./projectTaskUpdate.js"
 import projectTaskDelete from "./projectTaskDelete.js"
+import projectDonationUpdate from "./projectDonationUpdate.js"
 
 const projectIndex = express.Router()
 
@@ -15,6 +16,8 @@ projectIndex.post("/", projectCreate)
 projectIndex.put("/:projectId", projectUpdate)
 projectIndex.get("/:email", projectGetMany)
 projectIndex.get("/detail/:projectId", projectGetOne)
+// Project donations
+projectIndex.put("/:projectId/donations", projectDonationUpdate)
 // Project users
 projectIndex.post("/users/:projectId", projectUserCreate)
 // Project tasks

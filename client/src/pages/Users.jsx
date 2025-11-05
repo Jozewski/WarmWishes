@@ -1,8 +1,9 @@
 /* eslint-disable react/jsx-key */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { projectGetMany } from "../redux/projectsSlice";
 import { userGetMany } from "../redux/userSlice";
+import { messageCreate } from "../redux/messagesSlice";
 import { toast } from "react-toastify"
 
 const Users = () => {
@@ -10,13 +11,15 @@ const Users = () => {
 
   const { user } = useSelector((state) => state.auth);
   const { projects } = useSelector((state) => state.project);
-  console.log("projects", projects);
+  const { loading } = useSelector((state) => state.messages);
 
-  if (user.roles.includes("Project Manager")) {
-    console.log("Project Manager");
-  } else {
-    console.log(user.roles);
-  }
+  // State for combined form
+  const [messageForm, setMessageForm] = useState({
+    name: "",
+    projectName: "",
+    statusMessage: "",
+    finalReport: ""
+  });
 
   useEffect(() => {
     dispatch(projectGetMany(user.email));
@@ -24,18 +27,80 @@ const Users = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("handleSubmit");
-    (toast.dark = true),
-      toast.success(" Your Message has been sent!", {
+
+    // Find the project by name
+    const selectedProject = projects.find(p => p.projectName === messageForm.projectName);
+
+    if (!selectedProject) {
+      toast.error("Please select a valid project!", {
         position: "top-right",
         autoClose: 5000,
         closeOnClick: true,
-        className: "dark-toast",
         theme: "dark",
       });
-   
+      return;
+    }
+
+    // Check if at least one message is provided
+    if (!messageForm.statusMessage && !messageForm.finalReport) {
+      toast.error("Please provide at least one message (status update or final report)!", {
+        position: "top-right",
+        autoClose: 5000,
+        closeOnClick: true,
+        theme: "dark",
+      });
+      return;
+    }
+
+    try {
+      // Send status message if provided
+      if (messageForm.statusMessage && messageForm.statusMessage.trim() !== "") {
+        await dispatch(messageCreate({
+          projectId: selectedProject.id,
+          projectName: messageForm.projectName,
+          senderId: user.email || "",
+          senderName: messageForm.name,
+          messageType: "status_update",
+          content: messageForm.statusMessage
+        })).unwrap();
+      }
+
+      // Send final report if provided
+      if (messageForm.finalReport && messageForm.finalReport.trim() !== "") {
+        await dispatch(messageCreate({
+          projectId: selectedProject.id,
+          projectName: messageForm.projectName,
+          senderId: user.email || "",
+          senderName: messageForm.name,
+          messageType: "final_report",
+          content: messageForm.finalReport
+        })).unwrap();
+      }
+
+      toast.success("Your message(s) have been sent!", {
+        position: "top-right",
+        autoClose: 5000,
+        closeOnClick: true,
+        theme: "dark",
+      });
+
+      // Reset form
+      setMessageForm({
+        name: "",
+        projectName: "",
+        statusMessage: "",
+        finalReport: ""
+      });
+    } catch (error) {
+      toast.error("Failed to send message. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        closeOnClick: true,
+        theme: "dark",
+      });
+    }
   };
 
   return (
@@ -139,8 +204,10 @@ const Users = () => {
                       Your Name
                     </label>
                     <input
-                      type="name"
+                      type="text"
                       id="name"
+                      value={messageForm.name}
+                      onChange={(e) => setMessageForm({ ...messageForm, name: e.target.value })}
                       className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 dark:shadow-sm-light"
                       placeholder="Your Name"
                       required
@@ -153,26 +220,35 @@ const Users = () => {
                     >
                       Project Name
                     </label>
-                    <input
-                      type="text"
+                    <select
                       id="projectName"
+                      value={messageForm.projectName}
+                      onChange={(e) => setMessageForm({ ...messageForm, projectName: e.target.value })}
                       className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 dark:shadow-sm-light"
-                      placeholder="Name of Project"
                       required
-                    />
+                    >
+                      <option value="">Select a project</option>
+                      {projects.map((project) => (
+                        <option key={project.id} value={project.projectName}>
+                          {project.projectName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="sm:col-span-2">
                     <label
-                     htmlFor="message"
+                     htmlFor="statusMessage"
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400"
                     >
-                      Your message
+                      Project Status Update
                     </label>
                     <textarea
-                      id="message"
+                      id="statusMessage"
                       rows="6"
+                      value={messageForm.statusMessage}
+                      onChange={(e) => setMessageForm({ ...messageForm, statusMessage: e.target.value })}
                       className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Leave a comment..."
+                      placeholder="Update on milestones, challenges, or needed support..."
                     ></textarea>
                   </div>
 
@@ -189,25 +265,27 @@ const Users = () => {
                     </p>
                     <div className="sm:col-span-2">
                       <label
-                       htmlFor="message"
+                       htmlFor="finalReport"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400"
                       >
-                        Your message
+                        Final Report Message
                       </label>
                       <textarea
-                        id="message"
+                        id="finalReport"
                         rows="6"
+                        value={messageForm.finalReport}
+                        onChange={(e) => setMessageForm({ ...messageForm, finalReport: e.target.value })}
                         className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Leave a comment..."
+                        placeholder="Final report on project progress and outcomes..."
                       ></textarea>
                     </div>
                   </div>
                   <button
-                   onClick={handleSubmit}
                     type="submit"
-                    className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                    disabled={loading}
+                    className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Send message
+                    {loading ? "Sending..." : "Send message"}
                   </button>
                 </form>
               </div>

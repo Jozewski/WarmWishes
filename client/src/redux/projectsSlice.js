@@ -103,6 +103,17 @@ export const projectTaskDelete = createAsyncThunk(
   }
 );
 
+export const projectDonationUpdate = createAsyncThunk(
+  "project/donationUpdate",
+  async (donationInfo) => {
+    console.log("redux projectDonationUpdate project", donationInfo);
+    const { projectId, donationData } = donationInfo;
+    const response = await projectService.projectDonationUpdate(projectId, donationData);
+    console.log("redux projectDonationUpdate project response", response);
+    return response.data;
+  }
+);
+
 export const projectSlice = createSlice({
   name: "project",
   initialState,
@@ -209,6 +220,23 @@ export const projectSlice = createSlice({
       })
       .addCase(projectTaskDelete.rejected, (state, action) => {
         console.log("projectSlice projectTaskDelete.rejected", action.payload);
+        state.loading = false;
+      })
+
+      // Project donation update
+      .addCase(projectDonationUpdate.pending, (state, action) => {
+        console.log("projectSlice projectDonationUpdate.pending", action.payload);
+        state.loading = true;
+      })
+      .addCase(projectDonationUpdate.fulfilled, (state, action) => {
+        console.log("projectSlice projectDonationUpdate.fulfilled", action.payload);
+        state.loading = false;
+        if (action.payload.project) {
+          state.project = action.payload.project;
+        }
+      })
+      .addCase(projectDonationUpdate.rejected, (state, action) => {
+        console.log("projectSlice projectDonationUpdate.rejected", action.payload);
         state.loading = false;
       });
   },

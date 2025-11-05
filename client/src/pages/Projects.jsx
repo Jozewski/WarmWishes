@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { projectGetMany } from "../redux/projectsSlice";
+import { projectGetMany, projectDonationUpdate } from "../redux/projectsSlice";
 import { Link } from "react-router";
 import { toast } from "react-toastify"
 
@@ -10,31 +10,113 @@ const Projects = () => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-  const { projects } = useSelector((state) => state.project);
-  console.log("projects", projects);
+  const { projects, loading } = useSelector((state) => state.project);
 
-  if (user.roles.includes("Project Manager")) {
-    console.log("Project Manager");
-  } else {
-    console.log(user.roles);
-  }
+  // State for donation form
+  const [donationForm, setDonationForm] = useState({
+    projectName: "",
+    donations: [{ donatedItem: "", numberOfItems: 0 }],
+    category: "",
+    status: "",
+    description: ""
+  });
 
   useEffect(() => {
     dispatch(projectGetMany(user.email));
   }, []);
 
-  const handleSubmit = (e) => {
+  const addDonationField = () => {
+    setDonationForm({
+      ...donationForm,
+      donations: [...donationForm.donations, { donatedItem: "", numberOfItems: 0 }]
+    });
+  };
+
+  const removeDonationField = (index) => {
+    const newDonations = donationForm.donations.filter((_, i) => i !== index);
+    setDonationForm({
+      ...donationForm,
+      donations: newDonations
+    });
+  };
+
+  const updateDonation = (index, field, value) => {
+    const newDonations = [...donationForm.donations];
+    newDonations[index][field] = value;
+    setDonationForm({
+      ...donationForm,
+      donations: newDonations
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("handleSubmit");
-    (toast.dark = true),
-      toast.success(" The Donations have been updated!", {
+
+    // Find the project by name
+    const selectedProject = projects.find(p => p.projectName === donationForm.projectName);
+
+    if (!selectedProject) {
+      toast.error("Please select a valid project!", {
         position: "top-right",
         autoClose: 5000,
         closeOnClick: true,
-        className: "dark-toast",
         theme: "dark",
       });
-   
+      return;
+    }
+
+    // Validate that at least one donation has data
+    const validDonations = donationForm.donations.filter(
+      d => d.donatedItem && d.numberOfItems > 0
+    );
+
+    if (validDonations.length === 0) {
+      toast.error("Please add at least one donation item!", {
+        position: "top-right",
+        autoClose: 5000,
+        closeOnClick: true,
+        theme: "dark",
+      });
+      return;
+    }
+
+    try {
+      await dispatch(projectDonationUpdate({
+        projectId: selectedProject.id,
+        donationData: {
+          donations: validDonations,
+          category: donationForm.category,
+          status: donationForm.status,
+          description: donationForm.description
+        }
+      })).unwrap();
+
+      toast.success("The Donations have been updated!", {
+        position: "top-right",
+        autoClose: 5000,
+        closeOnClick: true,
+        theme: "dark",
+      });
+
+      // Reset form
+      setDonationForm({
+        projectName: "",
+        donations: [{ donatedItem: "", numberOfItems: 0 }],
+        category: "",
+        status: "",
+        description: ""
+      });
+
+      // Refresh projects list
+      dispatch(projectGetMany(user.email));
+    } catch (error) {
+      toast.error("Failed to update donations. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        closeOnClick: true,
+        theme: "dark",
+      });
+    }
   };
 
   return (
@@ -125,339 +207,91 @@ const Projects = () => {
                   <div className="grid gap-4 mb-4 sm:grid-cols-2 sm:gap-6 sm:mb-5">
                     <div className="sm:col-span-2">
                       <label
-                        htmlFor="name"
+                        htmlFor="projectName"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
                         Project Name
                       </label>
-                      <input
-                        type="text"
-                        name="name"
-                        id="name"
+                      <select
+                        name="projectName"
+                        id="projectName"
+                        value={donationForm.projectName}
+                        onChange={(e) => setDonationForm({ ...donationForm, projectName: e.target.value })}
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Type project name"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        required
                       >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
+                        <option value="">Select a project</option>
+                        {projects.map((project) => (
+                          <option key={project.id} value={project.projectName}>
+                            {project.projectName}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="donatedItems"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                        name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="donations"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Donations
-                      </label>
-                      <input
-                        type="text"
-                       name="donations"
-                        id="donations"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Donated Items"
-                        required=""
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label
-                        htmlFor="numberOfItems"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Number of Items
-                      </label>
-                      <input
-                        type="number"
-                         name="numberOfItems"
-                        id="numberOfItems"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100"
-                        required=""
-                      />
+
+                    {/* Dynamic Donation Fields */}
+                    <div className="sm:col-span-2">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                          Donation Items
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={addDonationField}
+                          className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700"
+                        >
+                          + Add Item
+                        </button>
+                      </div>
+
+                      {donationForm.donations.map((donation, index) => (
+                        <div key={index} className="grid gap-4 mb-4 sm:grid-cols-2 sm:gap-6 p-4 border border-gray-300 dark:border-gray-600 rounded-lg">
+                          <div className="w-full">
+                            <label
+                              htmlFor={`donatedItem-${index}`}
+                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                            >
+                              Donated Item {index + 1}
+                            </label>
+                            <input
+                              type="text"
+                              id={`donatedItem-${index}`}
+                              value={donation.donatedItem}
+                              onChange={(e) => updateDonation(index, 'donatedItem', e.target.value)}
+                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                              placeholder="e.g., Blankets, Socks, Coats"
+                            />
+                          </div>
+                          <div className="w-full">
+                            <label
+                              htmlFor={`numberOfItems-${index}`}
+                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                            >
+                              Number of Items
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="number"
+                                id={`numberOfItems-${index}`}
+                                value={donation.numberOfItems}
+                                onChange={(e) => updateDonation(index, 'numberOfItems', parseInt(e.target.value) || 0)}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                placeholder="100"
+                                min="0"
+                              />
+                              {donationForm.donations.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeDonationField(index)}
+                                  className="text-red-600 hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                     <div className="w-full">
                       <label
@@ -500,9 +334,11 @@ const Projects = () => {
                       </label>
                       <select
                         id="category"
+                        value={donationForm.category}
+                        onChange={(e) => setDonationForm({ ...donationForm, category: e.target.value })}
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       >
-                        <option defaultValue=""></option>
+                        <option value="">Select category</option>
                         <option value="Bulk">Bulk</option>
                         <option value="Corporate Sponsor">
                           Corporate Sponsor
@@ -520,9 +356,11 @@ const Projects = () => {
                       </label>
                       <select
                         id="status"
+                        value={donationForm.status}
+                        onChange={(e) => setDonationForm({ ...donationForm, status: e.target.value })}
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       >
-                        <option defaultValue=""></option>
+                        <option value="">Select status</option>
                         <option value="Active">Active</option>
                         <option value="Upcoming">Upcoming</option>
                         <option value="Being Deployed">Being Deployed</option>
@@ -542,6 +380,8 @@ const Projects = () => {
                       <textarea
                         id="description"
                         rows="8"
+                        value={donationForm.description}
+                        onChange={(e) => setDonationForm({ ...donationForm, description: e.target.value })}
                         className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Write a message describing the status of projects current needs here after the donations entered above..."
                       ></textarea>
@@ -550,28 +390,10 @@ const Projects = () => {
                   <div className="flex items-center space-x-4">
                     <button
                       type="submit"
-                      className="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                      disabled={loading}
+                      className="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Update Donations
-                    </button>
-                    <button
-                   onClick={handleSubmit}
-                      type="button"
-                      className="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-                    >
-                      <svg
-                        className="w-5 h-5 mr-1 -ml-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        ></path>
-                      </svg>
-                      Delete
+                      {loading ? "Updating..." : "Update Donations"}
                     </button>
                   </div>
                 </form>

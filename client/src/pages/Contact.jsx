@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
 import { contactCreate } from "../redux/contactsSlice";
 import { contactGetMany } from "../redux/contactsSlice";
 import { toast } from "react-toastify"
@@ -19,6 +20,7 @@ const ContactForm = () => {
   });
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(contactGetMany());
@@ -31,7 +33,6 @@ const ContactForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("handleSubmit");
     dispatch(contactCreate(contact));
     setContact({
       firstName: "",
@@ -40,16 +41,15 @@ const ContactForm = () => {
       phone: "",
       projectType: "",
       message: "",
-    }); // clear the form after submitting 
-    toast.dark = true,
-    toast.success(" Your Message has been sent!", {
+    }); // clear the form after submitting
+    toast.success("Your Message has been sent!", {
       position: "top-right",
       autoClose: 5000,
       closeOnClick: true,
-      className: "dark-toast",
       theme: "dark"
     })
-    navigate("/contact")
+    // Navigate is not needed since we're already on the contact page
+    // navigate("/contact")
   };
 
   return (
