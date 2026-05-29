@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import TwoLevelPieChart from "./TwoLevelPieChart";
+import { calculateTotalDonations, formatDonationTotal } from "../utils/donationCalculations";
 
 
 const DashboardHHH = () => {
@@ -8,6 +9,7 @@ const DashboardHHH = () => {
 
 
   const { datasets } = useSelector((state) => state.datasets);
+  const totalDonations = calculateTotalDonations(datasets);
 
 
 
@@ -30,7 +32,7 @@ const DashboardHHH = () => {
               <hr class="my-6 md:my-8 border-gray-800 dark:border-gray-800" />
               <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
                 <p class="text-2xl font-extrabold text-white sm:text-3xl dark:text-white">
-                  69,140 😊 DONATED ITEMS SO FAR 😊
+                  {formatDonationTotal(totalDonations)} 😊 DONATED ITEMS SO FAR 😊
                 </p>
               </div>
 
