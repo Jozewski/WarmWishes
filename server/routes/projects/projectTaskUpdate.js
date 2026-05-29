@@ -1,28 +1,37 @@
-import projectModel from "../../schemas/projectModel.js"
-import buildeModel from "../../schemas/builderModel.js"
-import userModel from "../../schemas/userModel.js"
+import { getProjectById, updateProjectTask } from "../../database/helpers.js"
 
 const projectTaskUpdate = async (req, res) => {
-  const { projectId } = req.params
-  const { taskIndex, taskName, taskDescription, startDate, endDate, status, hoursEstimated, hoursWorked, roles, users } = req.body
-  
-  // Validation
-  if (
-    (!taskName || taskName === "") || 
-    (!taskDescription || taskDescription === "") || 
-    // (!status || status === "") || 
-    (hoursEstimated === "") ||
-    (hoursWorked === "")
-  ) {
-    res.status(500).json({ "message": "Project task information not valid." })
-  }
-  else {
-    const updateProjectTask = await projectModel.updateOne({ _id: projectId }, { "$set": { [`tasks.${taskIndex}`]: { taskName, taskDescription, startDate, endDate, status, hoursEstimated, hoursWorked, roles, users } }})
-    res.status(200).json({ "success": true, "message": "Project task updated." })
+  try {
+    const projectId = Number(req.params.projectId)
+    const project = getProjectById(projectId)
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      })
+    }
+
+    const updatedTask = updateProjectTask(projectId, req.body?._id, req.body || {}, req.body?.taskIndex)
+
+    if (!updatedTask) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      })
+    }
+
+    res.json({
+      success: true,
+      data: updatedTask,
+    })
+  } catch (error) {
+    console.error("Project task update error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error updating project task",
+    })
   }
 }
 
 export default projectTaskUpdate
-
-
-// firstName: String , lastName: String, email: String, username: String, roles: [ String ]

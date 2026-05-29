@@ -19,10 +19,8 @@ const DashboardCSO = () => {
            <div className="bg-slate-500 dark:bg-slate-500 p-4 sm:ml-64">
            <div className="p-14 border-2 border-gray-600 border-dashed rounded-lg dark:border-gray-700 ">
           
-           <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-            <TwoLevelPieChart />
-
-            <div class="mt-6 sm:mt-8 lg:mt-0">
+           <div class="flex flex-col">
+            <div class="mb-8">
               <h1 class="text-xl font-semibold text-white sm:text-2xl dark:text-white">
               This Two-Level Pie Chart provides a clear view of our current donation progress for each Project. The central portion highlights the total donations received by every project, offering a quick snapshot of our  efforts.
 
@@ -50,6 +48,8 @@ const DashboardCSO = () => {
                 progress and individual needs within each of the Projects.
               </p>
             </div>
+
+            <TwoLevelPieChart />
           </div>
 
           <div className="flex items-justify justify-center h-144 mb-4 rounded bg-gray-800 dark:bg-gray-800">

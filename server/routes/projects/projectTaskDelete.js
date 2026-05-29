@@ -1,24 +1,37 @@
-import projectModel from "../../schemas/projectModel.js"
-import buildeModel from "../../schemas/builderModel.js"
-import userModel from "../../schemas/userModel.js"
+import { deleteProjectTask, getProjectById } from "../../database/helpers.js"
 
 const projectTaskDelete = async (req, res) => {
-  const { projectId, taskId } = req.params
+  try {
+    const projectId = Number(req.params.projectId)
+    const taskId = Number(req.params.taskId)
+    const project = getProjectById(projectId)
 
-  // Validation
-  if (
-    (!projectId || projectId === "") || 
-    (!taskId || taskId === "")
-  ) {
-    res.status(500).json({ "message": "Project task information not valid." })
-  }
-  else {
-    const updateProjectTask = await projectModel.updateOne({ _id: projectId }, { $pull: { tasks: { _id: taskId } }})
-    res.status(200).json({ "success": true, "message": "Project task updated." })
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      })
+    }
+
+    const deleted = deleteProjectTask(projectId, taskId)
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      })
+    }
+
+    res.json({
+      success: true,
+    })
+  } catch (error) {
+    console.error("Project task delete error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error deleting project task",
+    })
   }
 }
 
 export default projectTaskDelete
-
-
-// firstName: String , lastName: String, email: String, username: String, roles: [ String ]

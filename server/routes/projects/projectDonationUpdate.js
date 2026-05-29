@@ -1,4 +1,4 @@
-import projectModel from "../../schemas/projectModel.js"
+import { getProjectById, addDonationsToProject, updateProject } from "../../database/helpers.js"
 import syncDonationsToDataset from "./projectDonationSync.js"
 
 const projectDonationUpdate = async (req, res) => {
@@ -15,39 +15,41 @@ const projectDonationUpdate = async (req, res) => {
   }
 
   try {
+    const pid = parseInt(projectId)
+
+    // Check if project exists
+    const existingProject = getProjectById(pid)
+    if (!existingProject) {
+      return res.status(404).json({ message: "Project not found." })
+    }
+
     // Calculate total items
     const totalItems = donations.reduce((sum, donation) => {
       return sum + (parseInt(donation.numberOfItems) || 0)
     }, 0)
 
-    // Prepare donation summary
-    const donationSummary = {
-      totalItems,
-      lastUpdated: new Date(),
-      description: description || ""
-    }
+    // Add donations to project
+    addDonationsToProject(pid, donations)
 
-    // Update project with new donations
-    const updateProject = await projectModel.updateOne(
-      { _id: projectId },
-      {
-        $push: { donations: { $each: donations } },
-        donationSummary,
-        ...(category && { category }),
-        ...(status && { status })
+    // Update project with donation summary and optional fields
+    const updates = {
+      donationSummary: {
+        totalItems,
+        lastUpdated: new Date().toISOString(),
+        description: description || ""
       }
-    )
-
-    if (updateProject.modifiedCount === 0) {
-      return res.status(404).json({ message: "Project not found or no changes made." })
     }
+
+    if (status) updates.status = status
+
+    updateProject(pid, updates)
 
     // Get updated project
-    const updatedProject = await projectModel.findById(projectId)
+    const updatedProject = getProjectById(pid)
 
     // Sync donations to dataset for real-time dashboard updates
     try {
-      await syncDonationsToDataset(projectId)
+      await syncDonationsToDataset(pid)
     } catch (syncError) {
       console.error("Failed to sync donations to dataset:", syncError)
       // Don't fail the request if sync fails

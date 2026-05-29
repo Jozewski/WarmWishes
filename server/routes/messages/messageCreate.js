@@ -1,46 +1,42 @@
-import messageModel from "../../schemas/messageModel.js"
+import { createMessage, getProjectById } from "../../database/helpers.js"
 
 const messageCreate = async (req, res) => {
-  const { projectId, projectName, senderId, senderName, messageType, content } = req.body
-
-  // Validation
-  if (!projectId || projectId === "") {
-    return res.status(400).json({ message: "Project ID is required." })
-  }
-
-  if (!senderName || senderName === "") {
-    return res.status(400).json({ message: "Sender name is required." })
-  }
-
-  if (!messageType || !['status_update', 'final_report'].includes(messageType)) {
-    return res.status(400).json({ message: "Valid message type is required." })
-  }
-
-  if (!content || content === "") {
-    return res.status(400).json({ message: "Message content is required." })
-  }
-
   try {
-    // Create new message
-    const newMessage = await messageModel.create({
+    const message = req.body
+
+    if (!message?.projectId || !message?.senderName || !message?.messageType || !message?.content) {
+      return res.status(400).json({
+        success: false,
+        message: "projectId, senderName, messageType, and content are required",
+      })
+    }
+
+    const projectId = Number(message.projectId)
+    const project = getProjectById(projectId)
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      })
+    }
+
+    const createdMessage = createMessage({
+      ...message,
       projectId,
-      projectName,
-      senderId,
-      senderName,
-      messageType,
-      content,
-      createdAt: new Date(),
-      isRead: false
+      projectName: message.projectName || project.projectName,
     })
 
     res.status(201).json({
       success: true,
-      message: "Message sent successfully.",
-      data: newMessage
+      data: createdMessage,
     })
   } catch (error) {
-    console.error("Error creating message:", error)
-    res.status(500).json({ message: "Error creating message.", error: error.message })
+    console.error("Message create error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error creating message",
+    })
   }
 }
 

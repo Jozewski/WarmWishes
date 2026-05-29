@@ -13,6 +13,7 @@ import Login from './pages/Login'
 import DashboardLayout from './layouts/DashboardLayout'
 import Dashboard  from './pages/Dashboard'
 import Projects from './pages/Projects'
+import Donations from './pages/Donations'
 import ProjectDetail from './pages/ProjectDetail'
 import ProjectTasks from './pages/ProjectTasks'
 import ContactsInbox from './pages/ContactsInbox'
@@ -61,7 +62,8 @@ function App() {
       <Route element={<PrivateRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/projects" element={<Projects />} />                     
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/donations" element={<Donations />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />                     
             <Route path="/projects/:id/tasks" element={<ProjectTasks />} />                     
             <Route path="/contacts-inbox" element={<ContactsInbox />} /> 

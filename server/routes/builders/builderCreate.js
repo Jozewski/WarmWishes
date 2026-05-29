@@ -1,26 +1,29 @@
-
-import builderModel from "../../schemas/builderModel.js"
+import { createBuilder } from "../../database/helpers.js"
 
 const builderCreate = async (req, res) => {
-    const {projectType, tasks, roles, user } = req.body
-   // Validation
-   if (
-     (!projectType || projectType == "" ) ||   
-     (!roles || roles === 0 ) || 
-     (!tasks || tasks === 0 ) || 
-     (!user || user === 0 ) 
-    
-    
-    
-   ) {
-    res.status(500).json({ "message": "Project builder information not valid."})
-   }
-   else{
+  try {
+    const builder = req.body
 
-   
-    const newBuilder = await builderModel.create({projectType, tasks, roles, user})
+    if (!builder?.projectType) {
+      return res.status(400).json({
+        success: false,
+        message: "Project type is required",
+      })
+    }
 
-    res.status(200).json({ "success": true, "message": "Project  builder created." })
-   }
+    const createdBuilder = createBuilder(builder)
+
+    res.status(201).json({
+      success: true,
+      data: createdBuilder,
+    })
+  } catch (error) {
+    console.error("Builder create error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error creating builder",
+    })
+  }
 }
+
 export default builderCreate

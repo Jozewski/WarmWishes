@@ -1,7 +1,7 @@
 import "dotenv/config"
 import express from "express"
 import cors from "cors"
-import mongoose from "mongoose"
+import { initializeDatabase } from "./database/db.js"
 import userIndex from "./routes/users/userIndex.js"
 import projectIndex from "./routes/projects/projectIndex.js"
 import builderIndex from "./routes/builders/builderIndex.js"
@@ -12,9 +12,17 @@ import messageIndex from "./routes/messages/messageIndex.js"
 const app = express()
 app.use(express.json())
 app.use(cors())
-const port = 8000
+const port = process.env.PORT || 8000
 
-
+// Initialize SQLite database
+try {
+    initializeDatabase()
+    console.log('✓ Database initialized successfully')
+}
+catch(err) {
+    console.error('Failed to initialize database:', err)
+    process.exit(1)
+}
 
 app.use("/users", userIndex)
 app.use("/projects", projectIndex)
@@ -31,15 +39,6 @@ app.all('*', (req, res) =>{
     })
   })
 
-try {
-    const mongoURL = process.env.MONGODB_CONNECTION_STRING || ""
-    await mongoose.connect(mongoURL)
-
-    app.listen(port, () => {
-        // Server started successfully
-    })
-}
-
-catch(err) {
-    console.error(err)
-}
+app.listen(port, () => {
+    console.log(`✓ Server running on port ${port}`)
+})

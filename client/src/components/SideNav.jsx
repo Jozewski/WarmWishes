@@ -58,9 +58,28 @@ const SideNav = () => {
                   />
                 </svg>
                 <span className="flex-1 ms-3 whitespace-nowrap">Projects</span>
-                <span className="inline-flex items-center justify-center w-3 h-3 p-3 ms-3 text-sm font-medium text-white bg-blue-500 rounded-full dark:bg-blue-500 dark:text-white">
-                  {projects.length}
-                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/donations"
+                className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-gray-500 dark:hover:bg-gray-500 group"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="orange"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
+                  />
+                </svg>
+                <span className="flex-1 ms-3 whitespace-nowrap">Donation Updates</span>
               </Link>
             </li>
             <li>
@@ -83,10 +102,6 @@ const SideNav = () => {
                   />
                 </svg>
                 <span className="flex-1 ms-3 whitespace-nowrap">Inbox</span>
-                <span className="inline-flex items-center justify-center w-3 h-3 p-3 ms-3 text-sm font-medium text-white bg-green-500 rounded-full dark:bg-green-500 dark:text-white">
-                  {" "}
-                  {contacts.length}
-                </span>
               </Link>
             </li>
             <li>
@@ -109,10 +124,6 @@ const SideNav = () => {
                   />
                 </svg>
                 <span className="flex-1 ms-3 whitespace-nowrap">Users</span>
-                <span className="inline-flex items-center justify-center w-3 h-3 p-3 ms-3 text-sm font-medium text-white bg-purple-500 rounded-full dark:bg-purple-500 dark:text-white">
-                  {" "}
-                  {users.length}
-                </span>
               </Link>
             </li>
           </ul>

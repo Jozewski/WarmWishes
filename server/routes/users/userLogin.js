@@ -1,6 +1,7 @@
 import * as argon2 from "argon2"
 import jwt from "jsonwebtoken"
-import userModel from "../../schemas/userModel.js"
+import db from "../../database/db.js"
+import { getUserByEmail, updateUser } from "../../database/helpers.js"
 
 const userLogin = async (req, res) => {
   const { email, password  } = req.body
@@ -12,8 +13,8 @@ const userLogin = async (req, res) => {
     return res.status(401).json({ "success": false, "message": "Invalid credentials." })
   }
 
-  // Get user by email (without password)
-  const loginUser = await userModel.findOne({ email })
+  // Get user by email
+  const loginUser = getUserByEmail(email)
   // If user email not found
   if (!loginUser) {
     return res.status(401).json({ "success": false, "message": "Invalid credentials." })
@@ -27,9 +28,18 @@ const userLogin = async (req, res) => {
   const key = process.env.SECRET_KEY || ""
   const jwtExpire = process.env.JWT_EXPIRE || "24h"
   const token = jwt.sign({ email }, key, { expiresIn: jwtExpire })
-  loginUser.token.push(token)
-  loginUser.save()
-  const user = { firstName: loginUser.firstName, lastName: loginUser.lastName, email: loginUser.email, token: loginUser.token, roles: loginUser.roles, }
+
+  // Add token to user's tokens
+  const updatedTokens = [...loginUser.token, token]
+  updateUser(loginUser.id, { token: updatedTokens })
+
+  const user = {
+    firstName: loginUser.firstName,
+    lastName: loginUser.lastName,
+    email: loginUser.email,
+    token: updatedTokens,
+    roles: loginUser.roles
+  }
   res.status(200).json({ "success": true, "message": "User logged in.", user })
 }
 

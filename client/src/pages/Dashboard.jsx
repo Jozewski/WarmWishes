@@ -1,5 +1,6 @@
-// import { useEffect } from 'react'
-import { useSelector} from 'react-redux'
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { dataSetGetMany } from '../redux/DataSetSlice'
 import DashboardPM from '../components/DashboardPM'
 import DashboardCSO from '../components/DashboardCSO'
 import DashboardHHH from '../components/DashboardHHH'
@@ -8,9 +9,13 @@ import DashboardLM from '../components/DashboardLM'
 
 
 const Dashboard = () => {
+const dispatch = useDispatch()
 const { user } = useSelector(state => state.auth)
-if (user.roles.includes("Project Manager")) {
-}
+
+// Refresh datasets when dashboard loads to show latest donation data
+useEffect(() => {
+  dispatch(dataSetGetMany())
+}, [])
 
 
   // useEffect(() => {
