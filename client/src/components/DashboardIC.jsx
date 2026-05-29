@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import TwoLevelPieChart from "./TwoLevelPieChart";
+import { calculateTotalDonations, formatDonationTotal } from "../utils/donationCalculations";
 
 
 
@@ -10,6 +11,7 @@ const DashboardIC = () => {
 
 
   const { datasets } = useSelector((state) => state.datasets);
+  const totalDonations = calculateTotalDonations(datasets);
 
 
 

@@ -1,4 +1,5 @@
 import projectModel from "../../schemas/projectModel.js"
+import syncDonationsToDataset from "./projectDonationSync.js"
 
 const projectDonationUpdate = async (req, res) => {
   const { projectId } = req.params
@@ -43,6 +44,14 @@ const projectDonationUpdate = async (req, res) => {
 
     // Get updated project
     const updatedProject = await projectModel.findById(projectId)
+
+    // Sync donations to dataset for real-time dashboard updates
+    try {
+      await syncDonationsToDataset(projectId)
+    } catch (syncError) {
+      console.error("Failed to sync donations to dataset:", syncError)
+      // Don't fail the request if sync fails
+    }
 
     res.status(200).json({
       success: true,
