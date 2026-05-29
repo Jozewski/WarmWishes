@@ -28,7 +28,6 @@ const ContactForm = () => {
   }, []);
 
   useEffect(() => {
-    console.log("contact", contact);
   }, [contact]);
 
   const handleSubmit = (e) => {

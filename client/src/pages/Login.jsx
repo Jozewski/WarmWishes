@@ -15,7 +15,6 @@ const Login = () => {
   const  { loading, isLoggedIn, user } = useSelector((state) => state.auth)
 
   useEffect(() => {
-    console.log("useEffect", isLoggedIn)
     if (isLoggedIn && user.token) {
       // sessionStorage.setItem("token", user.token) // Store token
       navigate("/dashboard") // Navigate to dashboard
@@ -27,11 +26,9 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("handleSubmit")
     // Validation
     if (loginForm.email === "" || loginForm.password === "") {
       // Show error message/styling
-      console.log("form error")
     } 
     else {
       dispatch(authLogin({...loginForm}))   

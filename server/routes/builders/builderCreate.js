@@ -18,9 +18,8 @@ const builderCreate = async (req, res) => {
    else{
 
    
-    const newBuilder = await builderModel.create({projectType, tasks, roles, user}) 
+    const newBuilder = await builderModel.create({projectType, tasks, roles, user})
 
-    console.log("newBuilder", newBuilder)
     res.status(200).json({ "success": true, "message": "Project  builder created." })
    }
 }

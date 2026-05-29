@@ -13,14 +13,11 @@ const ProjectDetail = () => {
 
   const { user } = useSelector((state) => state.auth);
   const { projects } = useSelector((state) => state.project);
-  console.log("projects", projects);
 
   
   if (user.roles.includes("Project Manager")) {
-    console.log("Project Manager")
   }
   else {
-    console.log(user.roles)
   }
 
 

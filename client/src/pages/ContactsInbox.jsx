@@ -10,7 +10,6 @@ const ContactsInbox = () => {
 
   useEffect(() => {
     dispatch(contactGetMany(user.email));
-    console.log("contacts", contacts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   

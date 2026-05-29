@@ -18,9 +18,8 @@ const projectUpdate = async (req, res) => {
  }
  else{ 
  
-  const updateProject = await projectModel.updateOne({_id:projectId},{projectName, startDate, endDate, status }) 
+  const updateProject = await projectModel.updateOne({_id:projectId},{projectName, startDate, endDate, status })
 
-  console.log("updateProject", updateProject)
   res.status(200).json({ "success": true, "message": "Project Updated." })
  }
 }

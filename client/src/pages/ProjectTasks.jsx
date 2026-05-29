@@ -22,35 +22,28 @@ const ProjectTasks = () => {
 
   useEffect(() => {
     // let projectId = location.pathname.split("/")[2]
-    console.log("ProjectTasks useEffect location", location, projectId)
     dispatch(projectGetOne(projectId))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    console.log("ProjectTasks useEffect project", project)
-    console.log("ProjectTasks useEffect project.tasks", project.tasks)
     setTaskForm(project.tasks)
   }, [project])
 
   useEffect(() => {
-    console.log("useEffect taskForm", taskForm)
   }, [taskForm])
 
   const handleSave = (task) => {
-    console.log("projectId:", projectId, "task:", task)
     dispatch(projectTaskUpdate({ projectId, task }))
   }
 
   const handleDelete = (task) => {
-    console.log("handleDelete", task)
     dispatch(projectTaskDelete({ projectId, taskId: task._id }))
     setTaskForm(taskForm.filter(t => t._id !== task._id))
     setShowDeleteModal(false)
   }
 
   const handleAddTaskFormSave = (task) => {
-    console.log("handleAddTaskForm")
     dispatch(projectTaskCreate({ projectId, task }))
     setTaskForm([ ...taskForm, task ])
     setAddTaskForm({ ...initialTask, showForm: false })

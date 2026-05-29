@@ -17,19 +17,16 @@ const initialState = {
 export const authLogin = createAsyncThunk("auth/login", async (credentials) => {
   const { email, password } = credentials
   const response = await authService.authLogin(email, password)
-  console.log(response)
   return response.data
 })
 
 export const checkLogin = createAsyncThunk("auth/checkLogin", async (token) => {
   const response = await authService.checkLogin(token)
-  console.log(response)
   return response.data
 })
 
 export const logout = createAsyncThunk("auth/logout", async (token) => {
   const response = await authService.logout(token)
-  console.log(response)
   return response.data
 })
 
@@ -44,7 +41,6 @@ export const authSlice = createSlice({
         state.loading = true
       })
       .addCase(authLogin.fulfilled, (state, action) => {
-        console.log(action.payload)
         state.loading = false
         state.isLoggedIn = true
         state.user = { ...action.payload.user }
@@ -58,7 +54,6 @@ export const authSlice = createSlice({
         state.loading = true
       })
       .addCase(checkLogin.fulfilled, (state, action) => {
-        console.log("authSlice checkLogin fulfilled", action.payload)
         state.loading = false
         state.isLoggedIn = true
         state.user = { ...action.payload.user }
@@ -72,7 +67,6 @@ export const authSlice = createSlice({
         state.loading = true
       })
       .addCase(logout.fulfilled, (state, action) => {
-        console.log("authSlice logout fulfilled", action.payload)
         state.loading = false
         state.isLoggedIn = false
         state.user = { firstName: "", lastName: "", email: "", roles: [], token: "" }

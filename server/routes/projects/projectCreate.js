@@ -6,7 +6,6 @@ import projectModel from "../../schemas/projectModel.js"
 
 const projectCreate = async (req, res) => {
   const {projectName, projectDescription, projectType, startDate, endDate, status, roles, tasks, users, user } = req.body
-  console.log("server create: ",projectName, projectDescription, projectType, startDate, endDate, status, roles, tasks, users, user)
  // Validation
  if (
    (!projectName || projectName == "") 
@@ -29,9 +28,8 @@ const projectCreate = async (req, res) => {
   // })
   // console.log(newTasks)
  
-  const newProject = await projectModel.create({projectName, projectDescription, projectType, startDate, endDate, status, roles, tasks, users, user}) 
+  const newProject = await projectModel.create({projectName, projectDescription, projectType, startDate, endDate, status, roles, tasks, users, user})
 
-  console.log("newProject", newProject)
   res.status(200).json({ "success": true, "message": "Project created." })
  }
 }

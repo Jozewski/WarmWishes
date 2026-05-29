@@ -18,7 +18,6 @@ const projectTaskUpdate = async (req, res) => {
   }
   else {
     const updateProjectTask = await projectModel.updateOne({ _id: projectId }, { "$set": { [`tasks.${taskIndex}`]: { taskName, taskDescription, startDate, endDate, status, hoursEstimated, hoursWorked, roles, users } }})
-    console.log("updateProjectTask", updateProjectTask)
     res.status(200).json({ "success": true, "message": "Project task updated." })
   }
 }

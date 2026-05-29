@@ -15,9 +15,7 @@ const initialState = {
 
 
 export const builderGetMany = createAsyncThunk("builder/getMany", async () => {
-  console.log("redux builderGetMany builder")
   const response = await builderService.builderGetMany()
-  console.log("redux builderGetMany builder response", response)
   return response.data
 })
 
@@ -30,16 +28,13 @@ export const builderSlice = createSlice({
      
       // builders get many
       .addCase(builderGetMany.pending, (state, action) => {
-        console.log("builderSlice builderGetMany.pending", action.payload)
         state.loading = true
       })
       .addCase(builderGetMany.fulfilled, (state, action) => {
-        console.log("builderSlice builderGetMany.fulfilled", action.payload)
         state.loading = false
         state.builders = action.payload.builders
       })
       .addCase(builderGetMany.rejected, (state, action) => {
-        console.log("builderSlice builderGetMany.rejected", action.payload)
         state.loading = false
       })
   }
