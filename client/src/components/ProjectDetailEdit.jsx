@@ -91,7 +91,7 @@ const ProjectDetailEdit = () => {
     users: {},
   });
 
-  // eslint-disable-next-line no-unused-vars
+
   const [showModal, setShowModal] = useState(false);
   const [submitDisabled, setSubmitDisabled] = useState(false);
 

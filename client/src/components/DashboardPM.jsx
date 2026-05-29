@@ -29,25 +29,25 @@ const DashboardPM = () => {
               </button>
             </p>
           </div>
-          <div class="flex flex-col">
-            <div class="mb-8">
-              <h1 class="text-xl font-semibold text-white sm:text-2xl dark:text-white">
+          <div className="flex flex-col">
+            <div className="mb-8">
+              <h1 className="text-xl font-semibold text-white sm:text-2xl dark:text-white">
               This Two-Level Pie Chart provides a clear view of our current donation progress for each Project. The central portion highlights the total donations received by every project, offering a quick snapshot of our  efforts.
 
 
                 Combined total for all Projects to date is...
               </h1>
 
-              <hr class="my-6 md:my-8 border-gray-800 dark:border-gray-800" />
-              <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
-                <p class="text-2xl font-extrabold text-white sm:text-3xl dark:text-white">
+              <hr className="my-6 md:my-8 border-gray-800 dark:border-gray-800" />
+              <div className="mt-4 sm:items-center sm:gap-4 sm:flex">
+                <p className="text-2xl font-extrabold text-white sm:text-3xl dark:text-white">
                   {formatDonationTotal(totalDonations)} 😊 DONATED ITEMS SO FAR 😊
                 </p>
               </div>
 
-              <hr class="my-6 md:my-8 border-gray-800 dark:border-gray-800" />
+              <hr className="my-6 md:my-8 border-gray-800 dark:border-gray-800" />
 
-              <p class="mb-6 text-gray-100 dark:text-gray-100">
+              <p className="mb-6 text-gray-100 dark:text-gray-100">
                 The double-ring infographic visually presents donation data. The
                 outer ring breaks down contributions by quarter, showcasing how
                 much was donated towards each specific need. The detailed table
@@ -111,9 +111,11 @@ const DashboardPM = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {datasets[3].items.map((item)=>(
-                      
-                    <tr className="border-b dark:border-gray-600 hover:bg-gray-500 dark:hover:bg-gray-700">
+                    {datasets[3].items.map((item) => (
+                    <tr
+                      key={`${datasets[3].projectName}-${item.description}-${item.image}`}
+                      className="border-b dark:border-gray-600 hover:bg-gray-500 dark:hover:bg-gray-700"
+                    >
                      
                       <th
                         scope="row"
@@ -216,8 +218,11 @@ rounded-full"
                     </tr>
                   </thead>
                   <tbody>
-                  {datasets[1].items.map((item)=>(
-                    <tr className="border-b dark:border-gray-600 hover:bg-gray-500 dark:hover:bg-gray-700">
+                  {datasets[1].items.map((item) => (
+                    <tr
+                      key={`${datasets[1].projectName}-${item.description}-${item.image}`}
+                      className="border-b dark:border-gray-600 hover:bg-gray-500 dark:hover:bg-gray-700"
+                    >
                      
                       <th
                         scope="row"
@@ -319,8 +324,11 @@ rounded-full"
                     </tr>
                   </thead>
                   <tbody>
-                  {datasets[2].items.map((item)=>(
-                    <tr className="border-b dark:border-gray-600 hover:bg-gray-500 dark:hover:bg-gray-700">
+                  {datasets[2].items.map((item) => (
+                    <tr
+                      key={`${datasets[2].projectName}-${item.description}-${item.image}`}
+                      className="border-b dark:border-gray-600 hover:bg-gray-500 dark:hover:bg-gray-700"
+                    >
                      
                       <th
                         scope="row"
@@ -422,8 +430,11 @@ rounded-full"
                     </tr>
                   </thead>
                   <tbody>
-                  {datasets[0].items.map((item)=>(
-                    <tr className="border-b dark:border-gray-600 hover:bg-gray-500 dark:hover:bg-gray-700">
+                  {datasets[0].items.map((item) => (
+                    <tr
+                      key={`${datasets[0].projectName}-${item.description}-${item.image}`}
+                      className="border-b dark:border-gray-600 hover:bg-gray-500 dark:hover:bg-gray-700"
+                    >
                      
                       <th
                         scope="row"
@@ -490,4 +501,3 @@ rounded-full"
 };
 
 export default DashboardPM;
-
