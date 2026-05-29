@@ -1,77 +1,124 @@
-import { PureComponent } from "react";
-// eslint-disable-next-line no-unused-vars
-import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
+import { useSelector } from "react-redux";
+import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
 
-const data01 = [
-  { name: "Group A", value: 7070, fill: "yellow" },
-  { name: "Group B", value: 18740, fill: "#82ca9d" },
-  { name: "Group C", value: 14655, fill: "skyblue" },
-  { name: "Group D", value: 28675, fill: "#8884d8" },
-];
+// Color palette for different projects
+const PROJECT_COLORS = {
+  "Hydration Stations": "#FFD700",      // Yellow/Gold
+  "Warm Up for Winter": "#82ca9d",      // Green
+  "Spring Fling": "#87CEEB",            // Sky Blue
+  "All in For Fall": "#8884d8"          // Purple/Blue
+};
 
-const data02 = [
-  { name: "A1", value: 200, fill: "yellow" },
-  { name: "A2", value: 1200, fill: "yellow" },
-  { name: "A3", value: 210, fill: "yellow" },
-  { name: "A4", value: 210, fill: "yellow" },
-  { name: "B1", value: 210, fill: "#82ca9d" },
-  { name: "B2", value: 220, fill: "#82ca9d" },
-  { name: "B3", value: 200, fill: "#82ca9d" },
-  { name: "B4", value: 220, fill: "#82ca9d" },
-  { name: "B5", value: 220, fill: "#82ca9d" },
-  { name: "B6", value: 200, fill: "#82ca9d" },
-  { name: "B7", value: 220, fill: "#82ca9d" },
-  { name: "B8", value: 210, fill: "#82ca9d" },
-  { name: "B9", value: 220, fill: "#82ca9d" },
-  { name: "C2", value: 210, fill: "skyblue" },
-  { name: "C3", value: 210, fill: "skyblue" },
-  { name: "C4", value: 210, fill: "skyblue" },
-  { name: "C5", value: 255, fill: "skyblue" },
-  { name: "C6", value: 255, fill: "skyblue" },
-  { name: "C7", value: 215, fill: "skyblue" },
-  { name: "C8", value: 200, fill: "skyblue" },
-  { name: "C9", value: 210, fill: "skyblue" },
-  { name: "C10", value: 200, fill: "skyblue" },
-  { name: "C11", value: 200, fill: "skyblue" },
-  { name: "D1", value: 210, fill: "#8884d8" },
-  { name: "D2", value: 210, fill: "#8884d8" },
-  { name: "D3", value: 210, fill: "#8884d8" },
-  { name: "D4", value: 210, fill: "#8884d8" },
-  { name: "D5", value: 255, fill: "#8884d8" },
-  { name: "D6", value: 255, fill: "#8884d8" },
-  { name: "D7", value: 215, fill: "#8884d8" },
-  { name: "D8", value: 200, fill: "#8884d8" },
-  { name: "D9", value: 210, fill: "#8884d8" },
-  { name: "D10", value: 200, fill: "#8884d8" },
-  { name: "D11", value: 200, fill: "#8884d8" },
-];
+const TwoLevelPieChart = () => {
+  const { datasets } = useSelector((state) => state.datasets);
 
-export default class Example extends PureComponent {
-  static demoUrl = "https://codesandbox.io/s/pie-chart-of-two-levels-gor24";
+  // Transform datasets for outer ring (project totals)
+  const projectTotals = datasets.map(dataset => {
+    const total = dataset.items.reduce((sum, item) => sum + (item.current || 0), 0);
+    return {
+      name: dataset.projectName,
+      value: total,
+      fill: PROJECT_COLORS[dataset.projectName] || "#999999"
+    };
+  });
 
-  render() {
+  // Transform datasets for inner ring (individual items by project)
+  const itemDetails = [];
+  datasets.forEach(dataset => {
+    const projectColor = PROJECT_COLORS[dataset.projectName] || "#999999";
+    dataset.items.forEach(item => {
+      itemDetails.push({
+        name: `${dataset.projectName}: ${item.description}`,
+        value: item.current || 0,
+        fill: projectColor
+      });
+    });
+  });
+
+  // Filter out zero values for cleaner visualization
+  const filteredProjectTotals = projectTotals.filter(p => p.value > 0);
+  const filteredItemDetails = itemDetails.filter(i => i.value > 0);
+
+  // Custom label renderer for project names with bright, visible colors and background
+  const renderProjectLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, value, fill }) => {
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 150;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const textAnchor = x > cx ? 'start' : 'end';
+    const text = `${name}: ${value}`;
+
+    // Estimate text width for background rectangle
+    const textWidth = text.length * 9;
+    const textHeight = 24;
+    const padding = 6;
+
+    const rectX = textAnchor === 'start' ? x - padding : x - textWidth - padding;
+    const rectY = y - textHeight / 2;
+
     return (
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart width={400} height={400}>
-          <Pie
-            data={data01}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            outerRadius={120}
-            fill="fill"
-          />
-          <Pie
-            data={data02}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            innerRadius={140}
-            outerRadius={170}
-            label
-          />
-        </PieChart>
-      </ResponsiveContainer>
+      <g style={{ pointerEvents: 'none' }}>
+        {/* Background rectangle */}
+        <rect
+          x={rectX}
+          y={rectY}
+          width={textWidth + padding * 2}
+          height={textHeight}
+          fill="rgba(0, 0, 0, 0.85)"
+          stroke={fill}
+          strokeWidth="3"
+          rx="4"
+        />
+        {/* Text on top */}
+        <text
+          x={x}
+          y={y}
+          fill="#FFFFFF"
+          textAnchor={textAnchor}
+          dominantBaseline="central"
+          style={{ fontSize: '16px', fontWeight: 'bold', zIndex: 1000 }}
+        >
+          {text}
+        </text>
+      </g>
     );
-  }
-}
+  };
+
+  return (
+    <ResponsiveContainer width="100%" height={800}>
+      <PieChart>
+        {/* Inner pie - Project totals */}
+        <Pie
+          data={filteredProjectTotals}
+          dataKey="value"
+          cx="50%"
+          cy="50%"
+          outerRadius={150}
+          label={renderProjectLabel}
+          labelLine={{ stroke: '#FFFFFF', strokeWidth: 2 }}
+        >
+          {filteredProjectTotals.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill} />
+          ))}
+        </Pie>
+
+        {/* Outer pie - Item details */}
+        <Pie
+          data={filteredItemDetails}
+          dataKey="value"
+          cx="50%"
+          cy="50%"
+          innerRadius={170}
+          outerRadius={220}
+          label={({ value }) => value > 0 ? value : ""}
+        >
+          {filteredItemDetails.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill} />
+          ))}
+        </Pie>
+      </PieChart>
+    </ResponsiveContainer>
+  );
+};
+
+export default TwoLevelPieChart;

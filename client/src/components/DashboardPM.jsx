@@ -29,10 +29,8 @@ const DashboardPM = () => {
               </button>
             </p>
           </div>
-          <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-            <TwoLevelPieChart />
-
-            <div class="mt-6 sm:mt-8 lg:mt-0">
+          <div class="flex flex-col">
+            <div class="mb-8">
               <h1 class="text-xl font-semibold text-white sm:text-2xl dark:text-white">
               This Two-Level Pie Chart provides a clear view of our current donation progress for each Project. The central portion highlights the total donations received by every project, offering a quick snapshot of our  efforts.
 
@@ -43,7 +41,7 @@ const DashboardPM = () => {
               <hr class="my-6 md:my-8 border-gray-800 dark:border-gray-800" />
               <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
                 <p class="text-2xl font-extrabold text-white sm:text-3xl dark:text-white">
-                  69,140 😊 DONATED ITEMS SO FAR 😊
+                  {formatDonationTotal(totalDonations)} 😊 DONATED ITEMS SO FAR 😊
                 </p>
               </div>
 
@@ -60,6 +58,8 @@ const DashboardPM = () => {
                 progress and individual needs within each of the Projects.
               </p>
             </div>
+
+            <TwoLevelPieChart />
           </div>
 
           <div className="flex items-justify justify-center h-144 mb-4 rounded bg-gray-800 dark:bg-gray-800">

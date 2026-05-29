@@ -1,27 +1,30 @@
-
-import projectModel from "../../schemas/projectModel.js"
-// import builderModel from "../../schemas/builderModel.js"
-// import userModel from "../../schemas/userModel.js"
-
+import { getProjectById, updateProject } from "../../database/helpers.js"
 
 const projectUpdate = async (req, res) => {
-  const { projectId } = req.params
-  const {projectName, startDate, endDate, status} = req.body
- // Validation
- if (
-   (!projectName || projectName == "") ||  
-   (!status || status == "")  
-  //  (!users || users.length === 0) 
-  
- ) {
-  res.status(500).json({ "message": "Project information not valid."})
- }
- else{ 
- 
-  const updateProject = await projectModel.updateOne({_id:projectId},{projectName, startDate, endDate, status })
+  try {
+    const projectId = Number(req.params.projectId)
+    const project = getProjectById(projectId)
 
-  res.status(200).json({ "success": true, "message": "Project Updated." })
- }
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      })
+    }
+
+    const updatedProject = updateProject(projectId, req.body || {})
+
+    res.json({
+      success: true,
+      data: updatedProject,
+    })
+  } catch (error) {
+    console.error("Project update error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error updating project",
+    })
+  }
 }
 
 export default projectUpdate

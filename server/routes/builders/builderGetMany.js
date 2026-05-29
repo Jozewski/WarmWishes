@@ -1,9 +1,20 @@
-import builderModel from "../../schemas/builderModel.js"
+import { getAllBuilders } from "../../database/helpers.js"
 
 const builderGetMany = async (req, res) => {
+  try {
+    const builders = getAllBuilders()
 
-    const getBuilders = await builderModel.find()
-    res.status(200).json({ "success": true, "builders": getBuilders })
- 
+    res.json({
+      success: true,
+      data: builders,
+    })
+  } catch (error) {
+    console.error("Builder get many error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error getting builders",
+    })
+  }
 }
+
 export default builderGetMany

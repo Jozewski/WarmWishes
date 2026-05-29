@@ -1,22 +1,28 @@
-import messageModel from "../../schemas/messageModel.js"
+import { getMessagesByProjectId } from "../../database/helpers.js"
 
 const messageGetByProject = async (req, res) => {
-  const { projectId } = req.params
-
-  if (!projectId || projectId === "") {
-    return res.status(400).json({ message: "Project ID is required." })
-  }
-
   try {
-    const messages = await messageModel.find({ projectId }).sort({ createdAt: -1 })
+    const projectId = Number(req.params.projectId)
 
-    res.status(200).json({
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid projectId is required",
+      })
+    }
+
+    const messages = getMessagesByProjectId(projectId)
+
+    res.json({
       success: true,
-      messages
+      data: messages,
     })
   } catch (error) {
-    console.error("Error fetching messages for project:", error)
-    res.status(500).json({ message: "Error fetching messages.", error: error.message })
+    console.error("Message get by project error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error getting project messages",
+    })
   }
 }
 

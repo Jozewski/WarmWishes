@@ -1,5 +1,5 @@
 import * as argon2 from "argon2";
-import userModel from "../../schemas/userModel.js"
+import { createUser } from "../../database/helpers.js"
 
 const userCreate = async (req, res) => {
     const {firstName, lastName, email, username, password, roles } = req.body
@@ -14,10 +14,25 @@ const userCreate = async (req, res) => {
     res.status(500).json({ "message": "User information not valid."})
    }
    else{
-
-    const hashedPassword = await argon2.hash(password)
-    const newUser = await userModel.create({ firstName, lastName, email, username, password: hashedPassword, roles: [ roles ] })
-    res.status(200).json({ "success": true, "message": "User created." })
+    try {
+      const hashedPassword = await argon2.hash(password)
+      const newUser = createUser({
+        firstName,
+        lastName,
+        email,
+        username,
+        password: hashedPassword,
+        roles: [ roles ]
+      })
+      res.status(200).json({ "success": true, "message": "User created." })
+    } catch (error) {
+      // Handle unique constraint violations
+      if (error.message.includes('UNIQUE constraint failed')) {
+        res.status(400).json({ "success": false, "message": "Email or username already exists." })
+      } else {
+        res.status(500).json({ "success": false, "message": "Failed to create user." })
+      }
+    }
    }
 }
 
