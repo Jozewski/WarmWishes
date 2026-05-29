@@ -8,7 +8,6 @@ import logo from "../assets/images/logo.ico";
 const Navbar = () => {
   const location = useLocation()
   const { isLoggedIn } = useSelector(state => state.auth)
-  console.log("isLoggedIn", isLoggedIn)
   const dispatch = useDispatch()
 
   const handleLogout = async () => {

@@ -34,13 +34,12 @@ app.all('*', (req, res) =>{
 try {
     const mongoURL = process.env.MONGODB_CONNECTION_STRING || ""
     await mongoose.connect(mongoURL)
-    console.log(`Project Tracker connected to database ${mongoURL}`)
-    
+
     app.listen(port, () => {
-        console.log(`Project Tracker app listening on port ${port}`)
+        // Server started successfully
     })
 }
 
 catch(err) {
-    console.log(err)
+    console.error(err)
 }

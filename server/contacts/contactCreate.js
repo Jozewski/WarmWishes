@@ -19,7 +19,6 @@ const contactCreate = async (req, res) => {
 
    
     const newcontact = await contactModel.create({ firstName, lastName, email, phone, projectType, message })
-    console.log("newcontact", newcontact)
     res.status(200).json({ "success": true, "message": "contact created." })
    }
 }

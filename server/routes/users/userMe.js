@@ -13,9 +13,7 @@ const userMe = async (req, res) => {
   else {
     // Verify token
     const decoded = jwt.verify(token, process.env.SECRET_KEY)
-    console.log("decoded", decoded)
     const loggedInUser = await userModel.findOne({ email: decoded.email })
-    console.log("loggedInUser", loggedInUser)
     if (loggedInUser.token.includes(token)) {
       // User logged in
       res.status(200).json({ "success": true, "message": "User logged in.", user: {

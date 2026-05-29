@@ -106,27 +106,20 @@ const ProjectCreateForm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    console.log("builders", builders);
   }, [builders]);
 
   useEffect(() => {
-    console.log("users", users);
   }, [users]);
 
   useEffect(() => {
-    console.log("project", project);
   }, [project]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("handleSubmit");
-    console.log("FORM project", project);
-    console.log(builders);
    
     const taskUser = users.find((user) =>
       user.roles.includes(project.roles[0])
     );
-    console.log("taskUser", taskUser);
     // const tasks = builders.map(builder => builder.name)
     // Validation lol
     // const createdProject={
@@ -367,7 +360,6 @@ const ProjectCreateForm = () => {
             {project.projectType ? (
               builders
                 .find((builder) => {
-                  console.log(builder, project);
                   return builder.projectType === project.projectType;
                 })
                 .tasks.map((task, index) => (

@@ -2,7 +2,6 @@ import axios from 'axios'
 
 const authService = {
   authLogin: async (email, password) => {
-    console.log(email, password)
     return await axios.post(
       `${import.meta.env.VITE_NODE_SERVER_URL}/users/login`,
       { email, password }

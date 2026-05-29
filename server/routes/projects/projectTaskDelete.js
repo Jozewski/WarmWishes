@@ -4,7 +4,6 @@ import userModel from "../../schemas/userModel.js"
 
 const projectTaskDelete = async (req, res) => {
   const { projectId, taskId } = req.params
-  console.log(projectId, taskId)
 
   // Validation
   if (
@@ -15,7 +14,6 @@ const projectTaskDelete = async (req, res) => {
   }
   else {
     const updateProjectTask = await projectModel.updateOne({ _id: projectId }, { $pull: { tasks: { _id: taskId } }})
-    console.log("updateProjectTask", updateProjectTask)
     res.status(200).json({ "success": true, "message": "Project task updated." })
   }
 }

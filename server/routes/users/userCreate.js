@@ -17,7 +17,6 @@ const userCreate = async (req, res) => {
 
     const hashedPassword = await argon2.hash(password)
     const newUser = await userModel.create({ firstName, lastName, email, username, password: hashedPassword, roles: [ roles ] })
-    console.log("newUser", newUser)
     res.status(200).json({ "success": true, "message": "User created." })
    }
 }

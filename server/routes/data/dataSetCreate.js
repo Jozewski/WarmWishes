@@ -7,7 +7,6 @@ const dataSetCreate = async (req, res) => {
 
    
     const newDataSet = await dataSetModel.create({ projectName, items })
-    console.log("newDataSet", newDataSet)
     res.status(200).json({ "success": true, "message": "dataSet created." })
    
 }

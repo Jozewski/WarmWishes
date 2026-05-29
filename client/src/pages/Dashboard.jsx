@@ -9,9 +9,7 @@ import DashboardLM from '../components/DashboardLM'
 
 const Dashboard = () => {
 const { user } = useSelector(state => state.auth)
-console.log("user", user)
 if (user.roles.includes("Project Manager")) {
-  console.log("Project Manager")
 }
 
 

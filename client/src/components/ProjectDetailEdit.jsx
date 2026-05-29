@@ -97,7 +97,6 @@ const ProjectDetailEdit = () => {
 
   useEffect(() => {
     let projectId = location.pathname.split("/")[2];
-    console.log("ProjectDetailEdit useEffect location", location, projectId);
     dispatch(projectGetOne(projectId));
   }, []);
 
@@ -108,19 +107,14 @@ const ProjectDetailEdit = () => {
   }, []); 
 
   useEffect(() => {
-    console.log("users", users);
   }, [users]);
 
   useEffect(() => {
-    console.log("project", project);
   }, [project]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     let projectId = location.pathname.split("/")[2];
-    console.log("ProjectDetailEdit useEffect location", location, projectId);
-    console.log("handleSubmit");
-    console.log("project", projectId, project);
    
     dispatch(projectUpdate({ projectId: projectId, project: projectForm }));
     setShowModal(true);

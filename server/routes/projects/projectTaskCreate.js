@@ -18,7 +18,6 @@ const projectTaskUpdate = async (req, res) => {
   }
   else {
     const updateProjectTask = await projectModel.findOne({ _id: projectId })
-    console.log("updateProjectTask", updateProjectTask)
     updateProjectTask.tasks.push({ taskIndex, taskName, taskDescription, startDate, endDate, status, hoursEstimated, hoursWorked, roles, users })
     updateProjectTask.save()
     res.status(200).json({ "success": true, "message": "Project task added." })
