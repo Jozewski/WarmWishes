@@ -2,17 +2,14 @@ import * as argon2 from "argon2"
 import jwt from "jsonwebtoken"
 import userModel from "../../schemas/userModel.js"
 
-// TODO: Create token and store in user.token array
-// TODO: Return above token on successful login
-
 const userLogin = async (req, res) => {
   const { email, password  } = req.body
   // Validation
   if (
-    (!email || email == "") || 
-    (!password || password == "") 
+    (!email || email == "") ||
+    (!password || password == "")
   ) {
-    return res.status(500).json({ "message": "User information not valid." })
+    return res.status(401).json({ "success": false, "message": "Invalid credentials." })
   }
 
   // Get user by email (without password)
@@ -20,17 +17,18 @@ const userLogin = async (req, res) => {
   console.log("loginUser", loginUser)
   // If user email not found
   if (!loginUser) {
-    return res.status(500).json({ "success": false, "message": "User information not valid." })
+    return res.status(401).json({ "success": false, "message": "Invalid credentials." })
   }
   const isPasswordCorrect = await argon2.verify(loginUser.password, password)
   // If password is incorrect
   if (!isPasswordCorrect) {
-    return res.status(500).json({ "success": false, "message": "User information not valid." })
+    return res.status(401).json({ "success": false, "message": "Invalid credentials." })
   }
-  // If user exists and paswword is correct
+  // If user exists and password is correct
   console.log(process.env.SECRET_KEY)
   const key = process.env.SECRET_KEY || ""
-  const token = jwt.sign({ email }, key)
+  const jwtExpire = process.env.JWT_EXPIRE || "24h"
+  const token = jwt.sign({ email }, key, { expiresIn: jwtExpire })
   console.log("token", token)
   loginUser.token.push(token)
   loginUser.save()

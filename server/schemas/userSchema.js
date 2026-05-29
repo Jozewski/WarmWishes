@@ -1,7 +1,5 @@
 import mongoose from "mongoose"
 
-// TODO: Make sure email and username are unique
-
 const Schema = mongoose.Schema
 
 const userSchema = new Schema({
@@ -15,15 +13,20 @@ const userSchema = new Schema({
   },
   email: {
     type: String,
-    default: ""
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
   },
   username: {
     type: String,
-    default: ""
+    required: true,
+    unique: true,
+    trim: true
   },
   password: {
     type: String,
-    default: ""
+    required: true
   },
   roles: [ String ],
   token: {

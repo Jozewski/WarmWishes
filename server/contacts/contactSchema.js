@@ -1,7 +1,5 @@
 import mongoose from "mongoose"
 
-// TODO: Make sure email and username are unique
-
 const Schema = mongoose.Schema
 
 const contactSchema = new Schema({
